@@ -3,24 +3,59 @@ import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } fr
 import { useTheme } from '@/contexts/ThemeContext';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Card } from '@/components/ui/Card';
-import { createCertificate } from '@/lib/certificates';
+import { createCertificate, deleteCertificate } from '@/lib/certificates';
 import { Certificate } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 
 interface CertificateGeneratorProps {
   artworkId: string;
   onCertificateGenerated?: (certificate: Certificate) => void;
+  onCertificateDeleted?: () => void;
   existingCertificate?: Certificate | null;
 }
 
 export function CertificateGenerator({
   artworkId,
   onCertificateGenerated,
+  onCertificateDeleted,
   existingCertificate,
 }: CertificateGeneratorProps) {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [certificate, setCertificate] = useState<Certificate | null>(existingCertificate || null);
+
+  const handleDeleteCertificate = () => {
+    if (!certificate) return;
+    
+    Alert.alert(
+      'Delete Certificate',
+      'Are you sure you want to delete this certificate? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await deleteCertificate(certificate.id);
+              setCertificate(null);
+              onCertificateDeleted?.();
+              Alert.alert('Success', 'Certificate deleted successfully');
+            } catch (error: any) {
+              console.error('Error deleting certificate:', error);
+              Alert.alert('Error', error.message || 'Failed to delete certificate');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleGenerate = async () => {
     if (!artworkId) {
@@ -30,29 +65,6 @@ export function CertificateGenerator({
 
     setLoading(true);
     try {
-      // ============================================
-      // DEV MODE: Supabase insertion disabled
-      // ============================================
-      console.log('🚧 DEV MODE: Skipping certificate creation in Supabase');
-      console.log('Artwork ID:', artworkId);
-      
-      // Mock certificate for dev mode
-      const mockCertificate: Certificate = {
-        id: `mock-cert-${Date.now()}`,
-        artwork_id: artworkId,
-        certificate_id: `CERT-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-        qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=mock-cert-${Date.now()}`,
-        blockchain_hash: `0x${Math.random().toString(16).substring(2)}`,
-        generated_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      
-      setCertificate(mockCertificate);
-      onCertificateGenerated?.(mockCertificate);
-      Alert.alert('Success', 'Certificate generated successfully! (Dev Mode)');
-      
-      /* ========== ORIGINAL CODE (DISABLED) ==========
       const newCertificate = await createCertificate(artworkId, {
         generateQR: true,
         generateBlockchainHash: true,
@@ -61,7 +73,6 @@ export function CertificateGenerator({
       setCertificate(newCertificate);
       onCertificateGenerated?.(newCertificate);
       Alert.alert('Success', 'Certificate generated successfully!');
-      ========== END OF DISABLED CODE ========== */
     } catch (error: any) {
       console.error('Error generating certificate:', error);
       Alert.alert('Error', error.message || 'Failed to generate certificate');
@@ -216,6 +227,38 @@ export function CertificateGenerator({
           >
             Generated: {new Date(certificate.generated_at || '').toLocaleDateString()}
           </Text>
+
+          <TouchableOpacity
+            style={[
+              styles.deleteButton,
+              {
+                backgroundColor: theme.colors.error,
+                borderRadius: theme.borderRadius.base,
+                padding: theme.spacing.sm,
+                marginTop: theme.spacing.base,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+              },
+            ]}
+            onPress={handleDeleteCertificate}
+            disabled={loading}
+          >
+            <Ionicons name="trash-outline" size={16} color={theme.colors.textOnPrimary} />
+            <Text
+              style={[
+                styles.deleteButtonText,
+                {
+                  color: theme.colors.textOnPrimary,
+                  fontSize: theme.typography.fontSize.sm,
+                  fontWeight: theme.typography.fontWeight.medium,
+                  marginLeft: theme.spacing.xs,
+                },
+              ]}
+            >
+              Delete Certificate
+            </Text>
+          </TouchableOpacity>
         </View>
       </Card>
     );
@@ -342,6 +385,12 @@ const styles = StyleSheet.create({
   },
   generatedAt: {
     textAlign: 'center',
+  },
+  deleteButton: {
+    marginTop: 16,
+  },
+  deleteButtonText: {
+    // Styles applied via theme
   },
 });
 

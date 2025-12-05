@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { Certificate } from '@/types';
+import { updateArtwork } from './artworks';
 
 /**
  * Generate a unique certificate ID
@@ -76,6 +77,14 @@ export async function createCertificate(
     throw error;
   }
 
+  // Automatically mark artwork as verified when certificate is created
+  try {
+    await updateArtwork(artworkId, { status: 'verified' });
+  } catch (updateError) {
+    console.error('Error updating artwork status to verified:', updateError);
+    // Don't throw - certificate was created successfully, status update is secondary
+  }
+
   return data;
 }
 
@@ -102,13 +111,34 @@ export async function getCertificateByArtworkId(artworkId: string): Promise<Cert
 }
 
 /**
- * Get certificate by certificate ID
+ * Get certificate by certificate ID (the unique certificate_id string)
  */
 export async function getCertificateById(certificateId: string): Promise<Certificate | null> {
   const { data, error } = await supabase
     .from('certificates')
     .select('*')
     .eq('certificate_id', certificateId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null;
+    }
+    console.error('Error fetching certificate:', error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * Get certificate by database ID (UUID)
+ */
+export async function getCertificateByDbId(id: string): Promise<Certificate | null> {
+  const { data, error } = await supabase
+    .from('certificates')
+    .select('*')
+    .eq('id', id)
     .single();
 
   if (error) {
@@ -155,5 +185,40 @@ export async function getUserCertificates(userId: string): Promise<Certificate[]
   }
 
   return data || [];
+}
+
+/**
+ * Delete a certificate by database ID (UUID)
+ */
+export async function deleteCertificate(certificateId: string): Promise<void> {
+  // First get the certificate to find the artwork_id
+  // certificateId here is the database UUID (id field), not the certificate_id string
+  const certificate = await getCertificateByDbId(certificateId);
+  const artworkId = certificate?.artwork_id;
+
+  const { error } = await supabase
+    .from('certificates')
+    .delete()
+    .eq('id', certificateId);
+
+  if (error) {
+    console.error('Error deleting certificate:', error);
+    throw error;
+  }
+
+  // If certificate was deleted and artwork exists, check if there are any other certificates
+  // If no other certificates exist, mark artwork as unverified
+  if (artworkId) {
+    try {
+      const remainingCertificates = await getCertificateByArtworkId(artworkId);
+      if (!remainingCertificates) {
+        // No certificates left, mark artwork as unverified
+        await updateArtwork(artworkId, { status: 'unverified' });
+      }
+    } catch (updateError) {
+      console.error('Error updating artwork status after certificate deletion:', updateError);
+      // Don't throw - certificate was deleted successfully, status update is secondary
+    }
+  }
 }
 

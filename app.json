@@ -14,6 +14,11 @@
       "infoPlist": {
         "NFCReaderUsageDescription": "This app uses NFC to read and link NFC tags for artwork authentication and verification.",
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.nfc.readersession.formats": [
+          "NDEF"
+        ]
       }
     },
     "android": {
@@ -46,7 +51,13 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "Allow $(PRODUCT_NAME) to access your NFC to read and write NFC tags."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

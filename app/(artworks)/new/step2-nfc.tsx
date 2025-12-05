@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, Platform, Switch, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Screen } from '@/components/ui/Screen';
@@ -8,15 +8,17 @@ import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { useNewArtworkStore } from '@/store/useNewArtworkStore';
 import { linkNfcTag } from '@/lib/artworks';
 import { createCertificate } from '@/lib/certificates';
-import { requestNfcPermission, readNfcTag, stopNfc, isNfcSupported } from '@/lib/nfc';
+import { requestNfcPermission, readNfcTag, stopNfc, isNfcSupported, isNfcModuleAvailable } from '@/lib/nfc';
 
 export default function Step2NfcScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const { nfcUID: nfcUIDParam } = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [generatingCertificate, setGeneratingCertificate] = useState(false);
   const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
+  const [nfcUID, setNfcUID] = useState<string | null>(null);
 
   const {
     artworkId,
@@ -30,18 +32,29 @@ export default function Step2NfcScreen() {
   useEffect(() => {
     checkNfcSupport();
     
+    // If nfcUID is provided in params, set it
+    if (nfcUIDParam && typeof nfcUIDParam === 'string') {
+      setNfcUID(nfcUIDParam);
+    }
+    
     // Cleanup on unmount
     return () => {
       stopNfc().catch(() => 0);
     };
-  }, []);
+  }, [nfcUIDParam]);
 
   const checkNfcSupport = async () => {
     try {
+      // Check if NFC module is available first
+      if (!isNfcModuleAvailable()) {
+        setNfcSupported(false);
+        return;
+      }
       const supported = await isNfcSupported();
       setNfcSupported(supported);
     } catch (error) {
-      console.error('Error checking NFC support:', error);
+      console.warn('NFC not available (likely Expo Go or not configured):', error);
+      // Set to false if NFC module is not available
       setNfcSupported(false);
     }
   };
@@ -54,24 +67,11 @@ export default function Step2NfcScreen() {
       // Generate certificate immediately
       setGeneratingCertificate(true);
       try {
-        // ============================================
-        // DEV MODE: Supabase insertion disabled
-        // ============================================
-        console.log('🚧 DEV MODE: Skipping certificate creation in Supabase');
-        console.log('Artwork ID:', artworkId);
-        
-        // Mock certificate for dev mode
-        const mockCertificateId = `CERT-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-        setCertificateId(mockCertificateId);
-        console.log('Mock Certificate ID:', mockCertificateId);
-        
-        /* ========== ORIGINAL CODE (DISABLED) ==========
         const certificate = await createCertificate(artworkId, {
           generateQR: true,
           generateBlockchainHash: true,
         });
         setCertificateId(certificate.id);
-        ========== END OF DISABLED CODE ========== */
       } catch (error: any) {
         console.error('Error generating certificate:', error);
         Alert.alert('Error', 'Failed to generate certificate. You can still continue.');
@@ -93,8 +93,8 @@ export default function Step2NfcScreen() {
     // Check NFC support
     if (nfcSupported === false) {
       Alert.alert(
-        'NFC Not Supported',
-        'Your device does not support NFC functionality. You can still continue without linking an NFC tag.',
+        'NFC Not Available',
+        'NFC is not available on this device or NFC Manager is not properly configured. Please ensure you are using a development build and NFC is enabled.',
         [{ text: 'OK' }]
       );
       return;
@@ -126,10 +126,15 @@ export default function Step2NfcScreen() {
             text: 'Start Scan',
             onPress: async () => {
               try {
-                // Read NFC tag
-                const nfcUID = await readNfcTag();
-                console.log('NFC Tag UID:', nfcUID);
-                await handleNfcScan(nfcUID);
+                // If nfcUID is already provided, use it directly
+                if (nfcUID) {
+                  await handleNfcScan(nfcUID);
+                } else {
+                  // Read NFC tag
+                  const scannedUID = await readNfcTag();
+                  console.log('NFC Tag UID:', scannedUID);
+                  await handleNfcScan(scannedUID);
+                }
               } catch (error: any) {
                 await stopNfc();
                 if (error.message?.includes('cancelled')) {
@@ -151,7 +156,8 @@ export default function Step2NfcScreen() {
     }
   };
 
-  const handleNfcScan = async (nfcUID: string) => {
+  const handleNfcScan = async (scannedUID: string) => {
+    const uidToUse = nfcUID || scannedUID;
     if (!artworkId) {
       Alert.alert('Error', 'Artwork ID not found');
       await stopNfc();
@@ -162,20 +168,16 @@ export default function Step2NfcScreen() {
     try {
       await stopNfc();
       
-      // ============================================
-      // DEV MODE: Supabase insertion disabled
-      // ============================================
-      console.log('✅ NFC Tag Scanned Successfully!');
-      console.log('NFC UID:', nfcUID);
-      console.log('Artwork ID:', artworkId);
+      await linkNfcTag(artworkId, uidToUse);
+      
+      // If certificate exists, note it's linked via artwork
       if (certificateId) {
-        console.log('Certificate ID (will be linked to NFC):', certificateId);
+        console.log('Certificate linked to artwork:', certificateId);
       }
       
-      // Simulate success and navigate
       const successMessage = certificateId
-        ? `NFC tag linked successfully!\n\nTag UID: ${nfcUID}\nCertificate: ${certificateId}\n\n(Dev Mode - Not saved to database)`
-        : `NFC tag linked successfully!\n\nTag UID: ${nfcUID}\n\n(Dev Mode - Not saved to database)`;
+        ? `NFC tag linked successfully!\n\nTag UID: ${uidToUse}\nCertificate: ${certificateId}`
+        : `NFC tag linked successfully!\n\nTag UID: ${uidToUse}`;
       
       Alert.alert('Success', successMessage, [
         {
@@ -186,28 +188,6 @@ export default function Step2NfcScreen() {
           },
         },
       ]);
-      
-      /* ========== ORIGINAL CODE (DISABLED) ==========
-      await linkNfcTag(artworkId, nfcUID);
-      
-      // If certificate exists, link it to the NFC tag
-      // (This would typically be done via a junction table or updating NFC tag with certificate_id)
-      if (certificateId) {
-        // Update NFC tag with certificate reference
-        // This depends on your schema - you might need to add certificate_id to nfc_tags table
-        console.log('Linking certificate to NFC tag:', certificateId);
-      }
-      
-      Alert.alert('Success', `NFC tag linked successfully!\n\nTag UID: ${nfcUID}`, [
-        {
-          text: 'OK',
-          onPress: () => {
-            setScanning(false);
-            router.push('/(artworks)/new/step3-context');
-          },
-        },
-      ]);
-      ========== END OF DISABLED CODE ========== */
     } catch (error: any) {
       console.error('Error linking NFC tag:', error);
       await stopNfc();
@@ -395,7 +375,7 @@ export default function Step2NfcScreen() {
               ]}
             >
               <Ionicons
-                name="nfc-outline"
+                name="radio-outline"
                 size={56}
                 color={theme.colors.primary}
               />

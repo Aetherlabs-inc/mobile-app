@@ -1,10 +1,34 @@
-import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
 import { Platform, Alert } from 'react-native';
+
+// Import NFC Manager - now enabled for development/production builds
+let NfcManager: any = null;
+let NfcTech: any = null;
+let NfcAvailable = false;
+
+try {
+  const nfcModule = require('react-native-nfc-manager');
+  NfcManager = nfcModule.default || nfcModule;
+  NfcTech = nfcModule.NfcTech;
+  NfcAvailable = true;
+} catch (error) {
+  console.error('NFC Manager not available. Make sure react-native-nfc-manager is installed and you are using a development build:', error);
+  NfcAvailable = false;
+}
+
+/**
+ * Check if NFC module is available
+ */
+export function isNfcModuleAvailable(): boolean {
+  return NfcAvailable && NfcManager !== null;
+}
 
 /**
  * Check if NFC is supported on the device
  */
 export async function isNfcSupported(): Promise<boolean> {
+  if (!isNfcModuleAvailable()) {
+    return false;
+  }
   try {
     return await NfcManager.isSupported();
   } catch (error) {
@@ -17,6 +41,9 @@ export async function isNfcSupported(): Promise<boolean> {
  * Check if NFC is enabled on the device
  */
 export async function isNfcEnabled(): Promise<boolean> {
+  if (!isNfcModuleAvailable()) {
+    return false;
+  }
   try {
     return await NfcManager.isEnabled();
   } catch (error) {
@@ -29,6 +56,9 @@ export async function isNfcEnabled(): Promise<boolean> {
  * Start NFC manager
  */
 export async function startNfc(): Promise<void> {
+  if (!isNfcModuleAvailable()) {
+    throw new Error('NFC Manager is not available. Please ensure react-native-nfc-manager is properly installed and you are using a development or production build.');
+  }
   try {
     await NfcManager.start();
   } catch (error) {
@@ -41,6 +71,9 @@ export async function startNfc(): Promise<void> {
  * Stop NFC manager
  */
 export async function stopNfc(): Promise<void> {
+  if (!isNfcModuleAvailable()) {
+    return;
+  }
   try {
     await NfcManager.cancelTechnologyRequest().catch(() => 0);
   } catch (error) {
@@ -53,7 +86,9 @@ export async function stopNfc(): Promise<void> {
  * Returns the UID as a string
  */
 export async function readNfcTag(): Promise<string> {
-  let tech: any = null;
+  if (!isNfcModuleAvailable() || !NfcTech) {
+    throw new Error('NFC Manager is not available. Please ensure react-native-nfc-manager is properly installed and you are using a development or production build.');
+  }
   
   try {
     // Request NFC technology
@@ -98,7 +133,9 @@ export async function readNfcTag(): Promise<string> {
   } finally {
     // Clean up
     try {
-      await NfcManager.cancelTechnologyRequest();
+      if (isNfcModuleAvailable()) {
+        await NfcManager.cancelTechnologyRequest();
+      }
     } catch (error) {
       // Ignore cleanup errors
     }
@@ -109,6 +146,14 @@ export async function readNfcTag(): Promise<string> {
  * Request NFC permissions and check availability
  */
 export async function requestNfcPermission(): Promise<boolean> {
+  if (!isNfcModuleAvailable()) {
+    Alert.alert(
+      'NFC Not Available',
+      'NFC Manager is not available. Please ensure react-native-nfc-manager is properly installed and you are using a development or production build.'
+    );
+    return false;
+  }
+
   try {
     const supported = await isNfcSupported();
     if (!supported) {
@@ -141,4 +186,3 @@ export async function requestNfcPermission(): Promise<boolean> {
     return false;
   }
 }
-

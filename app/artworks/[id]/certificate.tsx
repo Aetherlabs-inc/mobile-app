@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -7,7 +7,7 @@ import { Screen } from '@/components/ui/Screen';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { CertificateGenerator } from '@/components/certificates/CertificateGenerator';
 import { getArtworkById } from '@/lib/artworks';
-import { getCertificateByArtworkId } from '@/lib/certificates';
+import { getCertificateByArtworkId, deleteCertificate } from '@/lib/certificates';
 import { Artwork } from '@/types';
 import { Certificate } from '@/types';
 
@@ -35,16 +35,8 @@ export default function CertificateScreen() {
       setArtwork(artworkData);
 
       if (artworkData) {
-        // ============================================
-        // DEV MODE: Supabase query disabled
-        // ============================================
-        console.log('🚧 DEV MODE: Skipping certificate fetch from Supabase');
-        setCertificate(null);
-        
-        /* ========== ORIGINAL CODE (DISABLED) ==========
         const certData = await getCertificateByArtworkId(id);
         setCertificate(certData);
-        ========== END OF DISABLED CODE ========== */
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -211,6 +203,9 @@ export default function CertificateScreen() {
             artworkId={artwork.id}
             existingCertificate={certificate}
             onCertificateGenerated={handleCertificateGenerated}
+            onCertificateDeleted={() => {
+              setCertificate(null);
+            }}
           />
         ) : (
           <CertificateGenerator

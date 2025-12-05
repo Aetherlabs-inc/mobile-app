@@ -255,5 +255,5 @@ export const darkTheme = {
     shadows: baseShadows, // you can tone these down later for dark
 };
 
-export type Theme = typeof lightTheme;
+export type Theme = typeof lightTheme | typeof darkTheme;
 export type ThemeMode = 'light' | 'dark';

@@ -28,17 +28,8 @@ export default function ArtworkSuccessScreen() {
   const checkNfcTag = async () => {
     if (!artworkId) return;
     try {
-      // ============================================
-      // DEV MODE: Supabase query disabled
-      // ============================================
-      console.log('🚧 DEV MODE: Skipping NFC tag check in Supabase');
-      // Set to false for dev mode (always show link button)
-      setHasNfcTag(false);
-      
-      /* ========== ORIGINAL CODE (DISABLED) ==========
       const tag = await getNFCTagByArtworkId(artworkId);
       setHasNfcTag(!!tag);
-      ========== END OF DISABLED CODE ========== */
     } catch (error) {
       console.error('Error checking NFC tag:', error);
     }

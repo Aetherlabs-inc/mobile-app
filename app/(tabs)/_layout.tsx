@@ -1,14 +1,24 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useMemo } from 'react';
 
 export default function TabsLayout() {
+  const theme = useTheme();
+
+  const screenOptions = useMemo(() => ({
+    tabBarActiveTintColor: theme?.colors?.primary || '#007AFF',
+    tabBarInactiveTintColor: theme?.colors?.textSecondary || '#666',
+    tabBarStyle: {
+      backgroundColor: theme?.colors?.tabBarBackground || '#fff',
+      borderTopColor: theme?.colors?.border || '#e0e0e0',
+    },
+    headerShown: false,
+  }), [theme]);
+
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: '#000',
-        tabBarInactiveTintColor: '#666',
-        headerShown: false,
-      }}
+      screenOptions={screenOptions}
     >
       <Tabs.Screen
         name="home"
@@ -16,6 +26,19 @@ export default function TabsLayout() {
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="scan"
+        options={{
+          title: 'Scan',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name="scan"
+              size={focused ? size + 2 : size}
+              color={focused ? theme?.colors?.primary : color}
+            />
           ),
         }}
       />
@@ -28,22 +51,12 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="scan"
-        options={{
-          title: 'Scan',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="scan" size={size} color={color} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
+          headerShown: false,
+          href: null, // Hide from bottom navigation
         }}
       />
     </Tabs>

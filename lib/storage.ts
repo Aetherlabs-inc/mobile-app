@@ -158,16 +158,119 @@ export async function deleteImage(
   bucketName: string = 'artwork_images'
 ): Promise<void> {
   try {
-    const { error } = await supabase.storage
+    console.log(`[deleteImage] Attempting to delete: bucket="${bucketName}", path="${filePath}"`);
+    
+    if (!filePath || filePath.trim().length === 0) {
+      throw new Error('File path is empty or invalid');
+    }
+
+    const { data, error } = await supabase.storage
       .from(bucketName)
       .remove([filePath]);
 
     if (error) {
-      console.error('Error deleting image:', error);
+      console.error('[deleteImage] Supabase storage error:', error);
+      console.error('[deleteImage] Error details:', JSON.stringify(error, null, 2));
       throw error;
     }
-  } catch (error) {
-    console.error('Error in deleteImage:', error);
+
+    console.log(`[deleteImage] Successfully deleted: ${filePath} from ${bucketName}`);
+    console.log('[deleteImage] Response data:', data);
+  } catch (error: any) {
+    console.error('[deleteImage] Error in deleteImage function:', error);
+    console.error('[deleteImage] Error message:', error?.message);
+    console.error('[deleteImage] Error stack:', error?.stack);
+    throw error;
+  }
+}
+
+/**
+ * Delete all files in a folder from Supabase Storage
+ * @param folderPath - Path to the folder in storage (e.g., "user_id/")
+ * @param bucketName - Name of the storage bucket (default: 'artwork_images')
+ */
+export async function deleteFolder(
+  folderPath: string,
+  bucketName: string = 'artwork_images'
+): Promise<void> {
+  try {
+    console.log(`[deleteFolder] Attempting to list and delete files in: bucket="${bucketName}", folder="${folderPath}"`);
+    
+    if (!folderPath || folderPath.trim().length === 0) {
+      throw new Error('Folder path is empty or invalid');
+    }
+
+    // Remove trailing slash for listing (Supabase list expects folder path without trailing slash)
+    const folderForList = folderPath.endsWith('/') ? folderPath.slice(0, -1) : folderPath;
+    // Keep trailing slash for file paths
+    const folderForPaths = folderPath.endsWith('/') ? folderPath : `${folderPath}/`;
+
+    console.log(`[deleteFolder] Listing folder: "${folderForList}"`);
+
+    // List all files in the folder
+    const { data: files, error: listError } = await supabase.storage
+      .from(bucketName)
+      .list(folderForList, {
+        limit: 100,
+        offset: 0,
+        sortBy: { column: 'name', order: 'asc' }
+      });
+
+    if (listError) {
+      console.error('[deleteFolder] Error listing files:', listError);
+      // If folder doesn't exist, that's okay - just return
+      if (listError.message?.includes('not found') || listError.statusCode === '404') {
+        console.log('[deleteFolder] Folder does not exist, nothing to delete');
+        return;
+      }
+      throw listError;
+    }
+
+    if (!files || files.length === 0) {
+      console.log('[deleteFolder] No files found in folder:', folderForList);
+      return;
+    }
+
+    // Filter out folders (directories) - only delete files
+    const fileList = files.filter(file => file.id !== null); // Files have id, folders don't
+    
+    if (fileList.length === 0) {
+      console.log('[deleteFolder] No files to delete (only folders found)');
+      return;
+    }
+
+    // Get full paths for all files
+    const filePaths = fileList.map(file => {
+      // If folder path is empty, just use filename, otherwise use folder/filename
+      const fullPath = folderForPaths ? `${folderForPaths}${file.name}` : file.name;
+      return fullPath;
+    });
+    
+    console.log(`[deleteFolder] Found ${filePaths.length} files to delete:`, filePaths);
+
+    // Delete all files in batches if needed (Supabase has a limit)
+    const batchSize = 100;
+    for (let i = 0; i < filePaths.length; i += batchSize) {
+      const batch = filePaths.slice(i, i + batchSize);
+      console.log(`[deleteFolder] Deleting batch ${Math.floor(i / batchSize) + 1} (${batch.length} files)...`);
+      
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .remove(batch);
+
+      if (error) {
+        console.error(`[deleteFolder] Supabase storage error for batch:`, error);
+        throw error;
+      }
+
+      console.log(`[deleteFolder] Successfully deleted batch:`, data);
+    }
+
+    console.log(`[deleteFolder] Successfully deleted ${filePaths.length} files from ${folderForList}`);
+  } catch (error: any) {
+    console.error('[deleteFolder] Error in deleteFolder function:', error);
+    console.error('[deleteFolder] Error message:', error?.message);
+    console.error('[deleteFolder] Error code:', error?.statusCode);
     throw error;
   }
 }

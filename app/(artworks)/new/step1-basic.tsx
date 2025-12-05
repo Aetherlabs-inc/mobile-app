@@ -63,14 +63,14 @@ export default function Step1BasicScreen() {
 
         if (source === 'camera') {
             result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true,
                 aspect: [4, 3],
                 quality: 0.8,
             });
         } else {
             result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true,
                 aspect: [4, 3],
                 quality: 0.8,
@@ -121,27 +121,6 @@ export default function Step1BasicScreen() {
 
         setLoading(true);
         try {
-            // ============================================
-            // DEV MODE: Supabase insertion disabled
-            // ============================================
-            console.log('🚧 DEV MODE: Skipping Supabase insertion');
-            console.log('Artwork data:', {
-                title: title.trim(),
-                artist: artist.trim(),
-                year: parseInt(year) || new Date().getFullYear(),
-                medium: medium.trim() || '',
-                dimensions: dimensions.trim() || '',
-                status,
-            });
-
-            // Mock artwork ID for navigation
-            const mockArtworkId = `mock-${Date.now()}`;
-            setArtworkId(mockArtworkId);
-
-            // Navigate to next step
-            router.push('/(artworks)/new/step2-nfc');
-
-            /* ========== ORIGINAL CODE (DISABLED) ==========
             let imageUrl: string | undefined;
 
             // Upload image if one is selected
@@ -173,7 +152,6 @@ export default function Step1BasicScreen() {
 
             setArtworkId(artwork.id);
             router.push('/(artworks)/new/step2-nfc');
-            ========== END OF DISABLED CODE ========== */
         } catch (error: any) {
             console.error('Error creating artwork:', error);
             Alert.alert('Error', error.message || 'Failed to create artwork');

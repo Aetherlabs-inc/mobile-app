@@ -32,3 +32,4 @@ icons.forEach(iconName => {
 console.log('\n✅ Placeholder icons created!');
 console.log('⚠️  Replace these with your actual app icons before production.');
 
+

@@ -27,11 +27,7 @@ function RootLayoutNav() {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="artworks" />
-        <Stack.Screen name="scan" />
-        <Stack.Screen name="profile" />
+        {/* Routes are auto-discovered by Expo Router */}
       </Stack>
       <StatusBar style="auto" />
     </>

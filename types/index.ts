@@ -1,13 +1,20 @@
+export type ProfileVisibility = 'private' | 'public';
+
 export interface User {
   id: string;
   email: string;
   full_name: string;
+  username?: string;
+  slug?: string;
   avatar_url?: string;
   user_type?: string;
   bio?: string;
   website?: string;
   location?: string;
   phone?: string;
+  instagram?: string;
+  profile_visibility?: ProfileVisibility;
+  email_verified?: boolean;
   created_at?: string;
   updated_at?: string;
 }

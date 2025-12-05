@@ -10,6 +10,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
+  reloadUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,6 +49,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadUserProfile = async (userId: string) => {
     try {
+      // Get auth user to check email verification
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const emailVerified = authUser?.email_confirmed_at ? true : false;
+
       // Try user_profiles table first
       let { data, error } = await supabase
         .from('user_profiles')
@@ -72,26 +77,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error || !data) {
         console.log('Profile not found, user needs to complete setup');
         // If profile doesn't exist, create a basic user from auth metadata
-        const { data: { user: authUser } } = await supabase.auth.getUser();
         if (authUser) {
           setUser({
             id: authUser.id,
             email: authUser.email || '',
             full_name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+            email_verified: emailVerified,
           });
         }
       } else if (data) {
-        setUser(data as User);
+        setUser({ ...data as User, email_verified: emailVerified });
       }
     } catch (error) {
       console.error('Error in loadUserProfile:', error);
       // Fallback to auth user data
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (authUser) {
+        const emailVerified = authUser.email_confirmed_at ? true : false;
         setUser({
           id: authUser.id,
           email: authUser.email || '',
           full_name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+          email_verified: emailVerified,
         });
       }
     } finally {
@@ -124,15 +131,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) throw error;
 
-    // Create profile in user_profiles table
-    if (data.user) {
-      const { error: profileError } = await supabase.from('user_profiles').insert({
-        id: data.user.id,
-        email: email,
-        full_name: name,
-        user_type: 'Artist', // Default user type
-        created_at: new Date().toISOString(),
-      });
+      // Create profile in user_profiles table
+      if (data.user) {
+        const { error: profileError } = await supabase.from('user_profiles').insert({
+          id: data.user.id,
+          email: email,
+          full_name: name,
+          user_type: 'artist', // Default user type (lowercase to match database constraint)
+          profile_visibility: 'private', // Default to private for MVP
+          created_at: new Date().toISOString(),
+        });
 
       if (profileError) {
         console.error('Error creating profile:', profileError);
@@ -152,8 +160,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(null);
   };
 
+  const reloadUser = async () => {
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (currentSession?.user) {
+      await loadUserProfile(currentSession.user.id);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, signIn, signUp, signOut, reloadUser }}>
       {children}
     </AuthContext.Provider>
   );

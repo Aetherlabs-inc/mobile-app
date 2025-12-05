@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Artwork, NFCTag } from '@/types';
-import { getArtworkById, getNFCTagByArtworkId } from '@/lib/artworks';
+import { getArtworkById, getNFCTagByArtworkId, deleteArtwork, unlinkNfcTag } from '@/lib/artworks';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function ArtworkDetailScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
+    const { user } = useAuth();
+    const theme = useTheme();
     const [artwork, setArtwork] = useState<Artwork | null>(null);
     const [nfcTag, setNfcTag] = useState<NFCTag | null>(null);
     const [loading, setLoading] = useState(true);
+    const [deleting, setDeleting] = useState(false);
     const [imageError, setImageError] = useState(false);
 
     useEffect(() => {
@@ -45,11 +50,82 @@ export default function ArtworkDetailScreen() {
         }
     };
 
+    const handleDelete = () => {
+        Alert.alert(
+            'Delete Artwork',
+            'Are you sure you want to delete this artwork? This action cannot be undone.',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        if (!artwork?.id) return;
+                        setDeleting(true);
+                        try {
+                            await deleteArtwork(artwork.id);
+                            Alert.alert('Success', 'Artwork deleted successfully', [
+                                {
+                                    text: 'OK',
+                                    onPress: () => router.replace('/(tabs)/artworks'),
+                                },
+                            ]);
+                        } catch (error: any) {
+                            console.error('Error deleting artwork:', error);
+                            Alert.alert('Error', error.message || 'Failed to delete artwork');
+                        } finally {
+                            setDeleting(false);
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
+    const handleEdit = () => {
+        if (artwork?.id) {
+            router.push(`/artworks/${artwork.id}/edit`);
+        }
+    };
+
+    const handleUnlinkNfc = () => {
+        if (!artwork?.id) return;
+        Alert.alert(
+            'Unlink NFC Tag',
+            'Are you sure you want to unlink this NFC tag from the artwork?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Unlink',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await unlinkNfcTag(artwork.id);
+                            setNfcTag(null);
+                            Alert.alert('Success', 'NFC tag unlinked successfully');
+                        } catch (error: any) {
+                            console.error('Error unlinking NFC tag:', error);
+                            Alert.alert('Error', error.message || 'Failed to unlink NFC tag');
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
+    const isOwner = artwork && user && artwork.user_id === user.id;
+
     if (loading) {
         return (
-            <SafeAreaView style={styles.container} edges={['top']}>
+            <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#000" />
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
                 </View>
             </SafeAreaView>
         );
@@ -69,8 +145,8 @@ export default function ArtworkDetailScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
-            <ScrollView style={styles.scrollView}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+            <ScrollView style={[styles.scrollView, { backgroundColor: theme.colors.background }]}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                         <Ionicons name="arrow-back" size={24} color="#000" />
@@ -128,8 +204,18 @@ export default function ArtworkDetailScreen() {
                         </View>
                         {nfcTag && (
                             <View style={styles.metadataRow}>
-                                <Text style={styles.metadataLabel}>NFC Tag</Text>
-                                <Text style={styles.metadataValue}>{nfcTag.nfc_uid}</Text>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.metadataLabel}>NFC Tag</Text>
+                                    <Text style={styles.metadataValue}>{nfcTag.nfc_uid}</Text>
+                                </View>
+                                {isOwner && (
+                                    <TouchableOpacity
+                                        onPress={handleUnlinkNfc}
+                                        style={{ padding: 8 }}
+                                    >
+                                        <Ionicons name="close-circle" size={20} color="#ff4444" />
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         )}
                     </View>
@@ -142,16 +228,46 @@ export default function ArtworkDetailScreen() {
                             <Ionicons name="document-text" size={20} color="#000" />
                             <Text style={styles.actionButtonText}>View Certificate</Text>
                         </TouchableOpacity>
+                        {isOwner && !nfcTag && (
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => router.push(`/artworks/link-nfc?id=${artwork.id}`)}
+                            >
+                                <Ionicons name="radio" size={20} color="#000" />
+                                <Text style={styles.actionButtonText}>Link NFC Tag</Text>
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity style={styles.actionButton}>
                             <Ionicons name="share" size={20} color="#000" />
                             <Text style={styles.actionButtonText}>Share</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.actionButton, styles.actionButtonDisabled]}>
-                            <Ionicons name="create" size={20} color="#999" />
-                            <Text style={[styles.actionButtonText, styles.actionButtonTextDisabled]}>
-                                Edit Metadata
-                            </Text>
-                        </TouchableOpacity>
+                        {isOwner && (
+                            <>
+                                <TouchableOpacity
+                                    style={styles.actionButton}
+                                    onPress={handleEdit}
+                                >
+                                    <Ionicons name="create" size={20} color="#000" />
+                                    <Text style={styles.actionButtonText}>Edit Metadata</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.actionButton, styles.deleteButton]}
+                                    onPress={handleDelete}
+                                    disabled={deleting}
+                                >
+                                    {deleting ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <>
+                                            <Ionicons name="trash" size={20} color="#fff" />
+                                            <Text style={[styles.actionButtonText, styles.deleteButtonText]}>
+                                                Delete Artwork
+                                            </Text>
+                                        </>
+                                    )}
+                                </TouchableOpacity>
+                            </>
+                        )}
                     </View>
                 </View>
             </ScrollView>
@@ -162,7 +278,6 @@ export default function ArtworkDetailScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
     },
     loadingContainer: {
         flex: 1,
@@ -290,6 +405,13 @@ const styles = StyleSheet.create({
     },
     actionButtonTextDisabled: {
         color: '#999',
+    },
+    deleteButton: {
+        backgroundColor: '#ff4444',
+        marginTop: 8,
+    },
+    deleteButtonText: {
+        color: '#fff',
     },
     backButtonText: {
         fontSize: 16,

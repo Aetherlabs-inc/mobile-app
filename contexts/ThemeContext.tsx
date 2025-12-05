@@ -3,7 +3,7 @@ import { lightTheme, darkTheme, Theme, ThemeMode } from '@/lib/theme';
 import { useColorScheme } from 'react-native';
 
 interface ThemeContextType {
-  theme: Theme;
+  theme: typeof lightTheme | typeof darkTheme;
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
 }
@@ -14,15 +14,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemColorScheme = useColorScheme();
   const [mode, setMode] = useState<ThemeMode>(() => {
     // Initialize with system theme or default to light
+    // TODO: Load from AsyncStorage to persist user preference
     return systemColorScheme === 'dark' ? 'dark' : 'light';
   });
   
-  // Sync with system theme changes
-  useEffect(() => {
-    if (systemColorScheme) {
-      setMode(systemColorScheme === 'dark' ? 'dark' : 'light');
-    }
-  }, [systemColorScheme]);
+  // Note: Removed auto-sync with system theme to allow user preference
+  // User can manually toggle dark mode in settings
 
   const theme = mode === 'dark' ? darkTheme : lightTheme;
 
@@ -50,6 +47,19 @@ export function useTheme() {
     console.warn('useTheme called outside ThemeProvider, using lightTheme as fallback');
     return lightTheme;
   }
+  // Ensure theme is always defined
+  if (!context.theme) {
+    console.warn('Theme is undefined in context, using lightTheme as fallback');
+    return lightTheme;
+  }
   return context.theme;
+}
+
+export function useThemeMode() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    return { mode: 'light' as ThemeMode, setMode: () => {} };
+  }
+  return { mode: context.mode, setMode: context.setMode };
 }
 

@@ -143,13 +143,13 @@ export default function SetupScreen() {
                 throw new Error('Failed to create user account');
             }
 
-            // Step 2: Map role to user_type
+            // Step 2: Map role to user_type (lowercase to match database constraint)
             const userTypeMap: Record<string, string> = {
-                artist: 'Artist',
-                gallery: 'Gallery',
-                collector: 'Collector',
+                artist: 'artist',
+                gallery: 'gallery',
+                collector: 'collector',
             };
-            const userType = form.role ? userTypeMap[form.role] || 'Artist' : 'Artist';
+            const userType = form.role ? userTypeMap[form.role] || 'artist' : 'artist';
 
             // Step 3: Prepare profile data
             const location = form.city && form.country

@@ -110,7 +110,7 @@ export async function linkNfcTag(artworkId: string, nfcUID: string): Promise<NFC
       .update({
         artwork_id: artworkId,
         is_bound: true,
-        binding_status: 'BOUND',
+        binding_status: 'bound',
       })
       .eq('id', existingTag.id)
       .select()
@@ -130,7 +130,7 @@ export async function linkNfcTag(artworkId: string, nfcUID: string): Promise<NFC
         artwork_id: artworkId,
         nfc_uid: nfcUID,
         is_bound: true,
-        binding_status: 'BOUND',
+        binding_status: 'bound',
       })
       .select()
       .single();
@@ -146,6 +146,55 @@ export async function linkNfcTag(artworkId: string, nfcUID: string): Promise<NFC
 
 export async function bindNFCTagToArtwork(nfcUID: string, artworkId: string): Promise<NFCTag> {
   return linkNfcTag(artworkId, nfcUID);
+}
+
+/**
+ * Delete an artwork
+ */
+export async function deleteArtwork(artworkId: string): Promise<void> {
+  const { error } = await supabase
+    .from('artworks')
+    .delete()
+    .eq('id', artworkId);
+
+  if (error) {
+    console.error('Error deleting artwork:', error);
+    throw error;
+  }
+}
+
+/**
+ * Unlink NFC tag from artwork
+ */
+export async function unlinkNfcTag(artworkId: string): Promise<void> {
+  const { error } = await supabase
+    .from('nfc_tags')
+    .update({
+      artwork_id: null,
+      is_bound: false,
+      binding_status: 'unbound',
+    })
+    .eq('artwork_id', artworkId);
+
+  if (error) {
+    console.error('Error unlinking NFC tag:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete NFC tag
+ */
+export async function deleteNfcTag(nfcTagId: string): Promise<void> {
+  const { error } = await supabase
+    .from('nfc_tags')
+    .delete()
+    .eq('id', nfcTagId);
+
+  if (error) {
+    console.error('Error deleting NFC tag:', error);
+    throw error;
+  }
 }
 
 
