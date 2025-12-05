@@ -62,3 +62,4 @@ npx expo start --dev-client
 If you need to test quickly without animations, you can temporarily remove Moti imports and use plain React Native components. This is not recommended for production but works for quick testing.
 
 
+

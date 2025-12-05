@@ -72,3 +72,4 @@ After the build succeeds, verify:
 - EAS build needs explicit dependencies (not just peer deps)
 - Using pnpm ensures consistency with local development
 
+

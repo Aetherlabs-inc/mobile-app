@@ -391,3 +391,4 @@ npx expo export --dump-sourcemap
 
 **Note:** For NFC testing, you must use a development build on a physical device. Expo Go does not support NFC functionality.
 
+

@@ -19,6 +19,30 @@ export interface User {
   updated_at?: string;
 }
 
+/**
+ * Public profile data - safe to share with anyone
+ * Excludes sensitive information like email, phone, etc.
+ */
+export interface PublicProfile {
+  id: string;
+  full_name: string;
+  username?: string;
+  slug?: string;
+  avatar_url?: string;
+  user_type?: string;
+  bio?: string;
+  location?: string;
+  profile_visibility?: ProfileVisibility;
+  created_at?: string;
+  // Statistics (computed separately)
+  statistics?: {
+    artworks: number;
+    certificates: number;
+    tags_linked?: number;
+    scans_this_week?: number;
+  };
+}
+
 export interface Artwork {
   id: string;
   user_id: string;

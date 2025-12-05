@@ -22,5 +22,5 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_slug ON user_profiles(slug);
 
 -- Add comment
 COMMENT ON COLUMN user_profiles.profile_visibility IS 'Profile visibility setting: private (default) or public. Controls what is visible on shared profile links.';
-COMMENT ON COLUMN user_profiles.slug IS 'URL-friendly identifier for profile sharing (e.g., used in https://app.aetherlabs.art/a/{slug})';
+COMMENT ON COLUMN user_profiles.slug IS 'URL-friendly identifier for profile sharing (e.g., used in https://www.aetherlabs.art/a/{slug})';
 
