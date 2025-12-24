@@ -164,59 +164,51 @@ export default function Step1BasicScreen() {
         <Screen scrollable edges={['top']}>
             <ScrollView
                 style={styles.scrollView}
-                contentContainerStyle={[
-                    styles.content,
-                    { paddingHorizontal: theme.spacing.screenPaddingHorizontal },
-                ]}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
             >
-                <View style={styles.header}>
-                    <Text
-                        style={[
-                            styles.title,
-                            {
-                                fontSize: theme.typography.heading1.fontSize,
-                                fontWeight: theme.typography.heading1.fontWeight,
-                                color: theme.colors.text,
-                                marginBottom: theme.spacing.base,
-                            },
-                        ]}
+                {/* Top Header */}
+                <View style={styles.topHeader}>
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        style={styles.backButton}
                     >
+                        <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+                    </TouchableOpacity>
+                </View>
+
+                {/* Title Section */}
+                <View style={styles.titleSection}>
+                    <Text style={[styles.greetingText, { color: theme.colors.text }]}>
                         Register Artwork
                     </Text>
-                    <Text
-                        style={[
-                            styles.subtitle,
-                            {
-                                fontSize: theme.typography.fontSize.base,
-                                color: theme.colors.textSecondary,
-                                marginBottom: theme.spacing['2xl'],
-                            },
-                        ]}
-                    >
+                    <Text style={[styles.greetingSubtext, { color: theme.colors.textSecondary }]}>
                         Step 1 of 3: Basic Information
                     </Text>
                 </View>
 
-                {/* Image Upload */}
-                <View style={styles.imageSection}>
-                    <Text
-                        style={[
-                            styles.sectionLabel,
-                            {
-                                fontSize: theme.typography.fontSize.sm,
-                                fontWeight: theme.typography.fontWeight.medium,
-                                color: theme.colors.textSecondary,
-                                marginBottom: theme.spacing.sm,
-                            },
-                        ]}
-                    >
-                        Artwork Image
-                    </Text>
+                {/* Image Upload Card */}
+                <View style={[styles.imageCard, {
+                    backgroundColor: theme.colors.surface,
+                    borderRadius: theme.borderRadius?.lg || 16,
+                    ...theme.shadows.base,
+                }]}>
+                    <View style={styles.imageCardHeader}>
+                        <View style={[styles.imageCardIconContainer, { backgroundColor: theme.colors.surfaceMuted }]}>
+                            <Ionicons name="image-outline" size={24} color={theme.colors.primary} />
+                        </View>
+                        <Text style={[styles.imageCardTitle, { color: theme.colors.text }]}>
+                            Artwork Image
+                        </Text>
+                    </View>
                     {imageUri ? (
                         <View style={styles.imageContainer}>
                             <Image source={{ uri: imageUri }} style={styles.previewImage} />
                             <TouchableOpacity
-                                style={styles.removeButton}
+                                style={[styles.removeButton, {
+                                    backgroundColor: theme.colors.surfaceElevated,
+                                    ...theme.shadows.sm,
+                                }]}
                                 onPress={() => setImageUri(null)}
                             >
                                 <Ionicons name="close-circle" size={24} color={theme.colors.error} />
@@ -224,86 +216,107 @@ export default function Step1BasicScreen() {
                         </View>
                     ) : (
                         <TouchableOpacity
-                            style={[
-                                styles.imageUploadButton,
-                                {
-                                    backgroundColor: theme.colors.surfaceMuted,
-                                    borderColor: theme.colors.border,
-                                    borderRadius: theme.borderRadius.base,
-                                },
-                            ]}
+                            style={[styles.imageUploadButton, {
+                                backgroundColor: theme.colors.surfaceMuted,
+                                borderRadius: theme.borderRadius?.base || 12,
+                            }]}
                             onPress={showImagePickerOptions}
                             disabled={uploadingImage}
+                            activeOpacity={0.7}
                         >
-                            <Ionicons name="image-outline" size={32} color={theme.colors.textTertiary} />
-                            <Text
-                                style={[
-                                    styles.imageUploadText,
-                                    {
-                                        color: theme.colors.textSecondary,
-                                        marginTop: theme.spacing.sm,
-                                    },
-                                ]}
-                            >
+                            <Ionicons name="camera-outline" size={40} color={theme.colors.textTertiary} />
+                            <Text style={[styles.imageUploadText, { color: theme.colors.textSecondary }]}>
                                 {uploadingImage ? 'Uploading...' : 'Tap to add image'}
+                            </Text>
+                            <Text style={[styles.imageUploadSubtext, { color: theme.colors.textTertiary }]}>
+                                Camera or Gallery
                             </Text>
                         </TouchableOpacity>
                     )}
                 </View>
 
-                {/* Form Fields */}
-                <Input
-                    label="Title *"
-                    placeholder="Enter artwork title"
-                    value={title}
-                    onChangeText={setTitle}
-                />
+                {/* Form Fields Card */}
+                <View style={[styles.formCard, {
+                    backgroundColor: theme.colors.surface,
+                    borderRadius: theme.borderRadius?.lg || 16,
+                    ...theme.shadows.base,
+                }]}>
+                    <View style={styles.formCardHeader}>
+                        <View style={[styles.formCardIconContainer, { backgroundColor: theme.colors.surfaceMuted }]}>
+                            <Ionicons name="create-outline" size={24} color={theme.colors.primary} />
+                        </View>
+                        <Text style={[styles.formCardTitle, { color: theme.colors.text }]}>
+                            Artwork Details
+                        </Text>
+                    </View>
+                    <View style={styles.formFields}>
+                        <View style={styles.inputWrapper}>
+                            <Input
+                                label="Title *"
+                                placeholder="Enter artwork title"
+                                value={title}
+                                onChangeText={setTitle}
+                                containerStyle={styles.inputContainer}
+                            />
+                        </View>
 
-                <Input
-                    label="Artist *"
-                    placeholder="Enter artist name"
-                    value={artist || initialArtist}
-                    onChangeText={setArtist}
+                        <View style={styles.inputWrapper}>
+                            <Input
+                                label="Artist *"
+                                placeholder="Enter artist name"
+                                value={artist || initialArtist}
+                                onChangeText={setArtist}
+                                containerStyle={styles.inputContainer}
+                            />
+                        </View>
 
-                />
+                        <View style={styles.inputWrapper}>
+                            <Input
+                                label="Year"
+                                placeholder="e.g., 2024"
+                                value={year}
+                                onChangeText={setYear}
+                                keyboardType="numeric"
+                                containerStyle={styles.inputContainer}
+                            />
+                        </View>
 
-                <Input
-                    label="Year"
-                    placeholder="e.g., 2024"
-                    value={year}
-                    onChangeText={setYear}
-                    keyboardType="numeric"
-                />
+                        <View style={styles.inputWrapper}>
+                            <Input
+                                label="Medium"
+                                placeholder="e.g., Oil on Canvas"
+                                value={medium}
+                                onChangeText={setMedium}
+                                containerStyle={styles.inputContainer}
+                            />
+                        </View>
 
-                <Input
-                    label="Medium"
-                    placeholder="e.g., Oil on Canvas"
-                    value={medium}
-                    onChangeText={setMedium}
-                />
+                        <View style={styles.inputWrapper}>
+                            <Input
+                                label="Dimensions"
+                                placeholder="e.g., 24 x 36 inches"
+                                value={dimensions}
+                                onChangeText={setDimensions}
+                                containerStyle={styles.inputContainer}
+                            />
+                        </View>
+                    </View>
+                </View>
 
-                <Input
-                    label="Dimensions"
-                    placeholder="e.g., 24 x 36 inches"
-                    value={dimensions}
-                    onChangeText={setDimensions}
-                />
-
-                {/* Status Dropdown */}
-                <View style={styles.statusSection}>
-                    <Text
-                        style={[
-                            styles.sectionLabel,
-                            {
-                                fontSize: theme.typography.fontSize.sm,
-                                fontWeight: theme.typography.fontWeight.medium,
-                                color: theme.colors.textSecondary,
-                                marginBottom: theme.spacing.sm,
-                            },
-                        ]}
-                    >
-                        Status
-                    </Text>
+                {/* Status Card */}
+                <View style={[styles.statusCard, {
+                    backgroundColor: theme.colors.surface,
+                    borderRadius: theme.borderRadius?.lg || 16,
+                    ...theme.shadows.base,
+                }]}>
+                    <View style={styles.statusCardHeader}>
+                        <View style={[styles.statusCardIconContainer, { backgroundColor: theme.colors.surfaceMuted }]}>
+                            <Ionicons name="checkmark-circle-outline" size={24} color={theme.colors.primary} />
+                        </View>
+                        <Text style={[styles.statusCardTitle, { color: theme.colors.text }]}>
+                            Verification Status
+                        </Text>
+                    </View>
                     <View style={styles.statusButtons}>
                         <TouchableOpacity
                             style={[
@@ -313,11 +326,18 @@ export default function Step1BasicScreen() {
                                         status === 'verified'
                                             ? theme.colors.primary
                                             : theme.colors.surfaceMuted,
-                                    borderRadius: theme.borderRadius.base,
+                                    borderRadius: theme.borderRadius?.base || 12,
+                                    ...(status === 'verified' ? theme.shadows.sm : {}),
                                 },
                             ]}
                             onPress={() => setStatus('verified')}
+                            activeOpacity={0.7}
                         >
+                            <Ionicons 
+                                name={status === 'verified' ? 'checkmark-circle' : 'checkmark-circle-outline'} 
+                                size={20} 
+                                color={status === 'verified' ? theme.colors.textOnPrimary : theme.colors.textSecondary} 
+                            />
                             <Text
                                 style={[
                                     styles.statusButtonText,
@@ -341,11 +361,18 @@ export default function Step1BasicScreen() {
                                         status === 'unverified'
                                             ? theme.colors.primary
                                             : theme.colors.surfaceMuted,
-                                    borderRadius: theme.borderRadius.base,
+                                    borderRadius: theme.borderRadius?.base || 12,
+                                    ...(status === 'unverified' ? theme.shadows.sm : {}),
                                 },
                             ]}
                             onPress={() => setStatus('unverified')}
+                            activeOpacity={0.7}
                         >
+                            <Ionicons 
+                                name={status === 'unverified' ? 'time' : 'time-outline'} 
+                                size={20} 
+                                color={status === 'unverified' ? theme.colors.textOnPrimary : theme.colors.textSecondary} 
+                            />
                             <Text
                                 style={[
                                     styles.statusButtonText,
@@ -370,8 +397,13 @@ export default function Step1BasicScreen() {
                         onPress={handleSubmit}
                         loading={loading || uploadingImage}
                         disabled={loading || uploadingImage}
+                        style={[styles.continueButton, {
+                            borderRadius: theme.borderRadius?.lg || 16,
+                            ...theme.shadows.base,
+                        }]}
                     />
                 </View>
+                <View style={{ height: 100 }} />
             </ScrollView>
         </Screen>
     );
@@ -381,21 +413,58 @@ const styles = StyleSheet.create({
     scrollView: {
         flex: 1,
     },
-    content: {
-        paddingTop: 24,
-        paddingBottom: 40,
+    scrollContent: {
+        paddingBottom: 20,
     },
-    header: {
-        marginBottom: 32,
+    topHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingTop: 12,
+        paddingBottom: 8,
     },
-    title: {
-        marginBottom: 8,
+    backButton: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    subtitle: {
-        marginBottom: 32,
+    titleSection: {
+        paddingHorizontal: 24,
+        paddingBottom: 28,
+        gap: 4,
     },
-    imageSection: {
-        marginBottom: 32,
+    greetingText: {
+        fontSize: 40,
+        fontWeight: '600',
+        marginBottom: 1,
+    },
+    greetingSubtext: {
+        fontSize: 18,
+        fontWeight: '500',
+    },
+    imageCard: {
+        marginHorizontal: 24,
+        marginBottom: 12,
+        padding: 20,
+    },
+    imageCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 16,
+    },
+    imageCardIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageCardTitle: {
+        fontSize: 18,
+        fontWeight: '600',
     },
     imageContainer: {
         position: 'relative',
@@ -404,33 +473,82 @@ const styles = StyleSheet.create({
     },
     previewImage: {
         width: '100%',
-        height: 300,
+        height: 280,
         resizeMode: 'cover',
     },
     removeButton: {
         position: 'absolute',
-        top: 8,
-        right: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        top: 12,
+        right: 12,
         borderRadius: 20,
-        padding: 4,
+        padding: 6,
     },
     imageUploadButton: {
-        borderWidth: 2,
-        borderStyle: 'dashed',
         padding: 40,
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: 200,
+        gap: 12,
     },
     imageUploadText: {
-        fontSize: 14,
+        fontSize: 16,
+        fontWeight: '600',
     },
-    sectionLabel: {
-        marginBottom: 8,
+    imageUploadSubtext: {
+        fontSize: 13,
     },
-    statusSection: {
-        marginBottom: 32,
+    formCard: {
+        marginHorizontal: 24,
+        marginBottom: 12,
+        padding: 20,
+    },
+    formCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 20,
+    },
+    formCardIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    formCardTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    formFields: {
+        gap: 0,
+    },
+    inputWrapper: {
+        marginBottom: 0,
+    },
+    inputContainer: {
+        marginBottom: 20,
+    },
+    statusCard: {
+        marginHorizontal: 24,
+        marginBottom: 12,
+        padding: 20,
+    },
+    statusCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 16,
+    },
+    statusCardIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    statusCardTitle: {
+        fontSize: 18,
+        fontWeight: '600',
     },
     statusButtons: {
         flexDirection: 'row',
@@ -438,16 +556,22 @@ const styles = StyleSheet.create({
     },
     statusButton: {
         flex: 1,
-        paddingVertical: 14,
+        paddingVertical: 16,
         paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: 'row',
+        gap: 8,
     },
     statusButtonText: {
         fontSize: 16,
     },
     buttonContainer: {
+        marginHorizontal: 24,
         marginTop: 24,
+    },
+    continueButton: {
+        paddingVertical: 18,
     },
 });
 

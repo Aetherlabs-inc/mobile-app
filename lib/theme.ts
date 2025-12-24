@@ -14,6 +14,7 @@ const palette = {
     neutral600: '#4B5563',
     neutral800: '#1F2933',
     neutral900: '#111827',
+    black: '#000000',
 
     // your palette
     palladian: '#EEE9DF',
@@ -22,6 +23,13 @@ const palette = {
     burningFlame: '#FFB162',
     truffleTrouble: '#A35139',
     abyssalAnchorfishBlue: '#1B2632',
+
+    // near-black shades
+    trueBlack: '#000000',
+    nearBlack: '#0A0A0A',
+    darkGray: '#121212',
+    darkGray2: '#1A1A1A',
+    darkGray3: '#212121',
 
     // system feedback
     red500: '#C62828',
@@ -146,41 +154,41 @@ const baseShadows = {
     },
 };
 
-// LIGHT THEME
+// LIGHT THEME - Enhanced
 export const lightTheme = {
     mode: 'light' as const,
     palette,
     colors: {
         // brand intent
-        primary: palette.blueFantastic,
-        primaryLight: palette.blueFantastic,
-        primaryDark: palette.abyssalAnchorfishBlue,
+        primary: palette.truffleTrouble,
+        primaryLight: palette.burningFlame,
+        primaryDark: palette.truffleTrouble,
 
         // accents
-        secondary: palette.truffleTrouble,
-        accent: palette.burningFlame,
+        secondary: palette.burningFlame,
+        accent: palette.blueFantastic,
 
-        // backgrounds
-        background: palette.palladian,
-        backgroundSecondary: palette.oatmeal,
-        backgroundTertiary: 'rgba(201, 193, 177, 0.65)',
+        // backgrounds - cleaner, brighter
+        background: palette.white,
+        backgroundSecondary: palette.neutral50,
+        backgroundTertiary: palette.neutral100,
 
         // surfaces
-        surface: 'rgba(255, 255, 255, 0.55)',
-        surfaceMuted: 'rgba(255, 255, 255, 0.35)',
+        surface: palette.white,
+        surfaceMuted: palette.neutral50,
         surfaceElevated: palette.white,
 
         // text
-        text: palette.abyssalAnchorfishBlue,
-        textSecondary: 'rgba(27, 38, 50, 0.72)',
-        textTertiary: 'rgba(27, 38, 50, 0.52)',
+        text: palette.nearBlack,
+        textSecondary: 'rgba(10, 10, 10, 0.65)',
+        textTertiary: 'rgba(10, 10, 10, 0.45)',
         textInverse: palette.white,
         textOnPrimary: palette.white,
 
         // borders
-        border: 'rgba(27, 38, 50, 0.10)',
-        borderLight: 'rgba(27, 38, 50, 0.06)',
-        borderDark: 'rgba(27, 38, 50, 0.18)',
+        border: 'rgba(10, 10, 10, 0.10)',
+        borderLight: 'rgba(10, 10, 10, 0.06)',
+        borderDark: 'rgba(10, 10, 10, 0.20)',
 
         // feedback
         success: palette.green500,
@@ -190,17 +198,17 @@ export const lightTheme = {
         errorBackground: palette.red100,
 
         // states
-        disabled: 'rgba(27, 38, 50, 0.08)',
-        disabledText: 'rgba(27, 38, 50, 0.35)',
-        pressed: 'rgba(27, 38, 50, 0.05)',
-        overlay: 'rgba(0, 0, 0, 0.45)',
+        disabled: 'rgba(10, 10, 10, 0.06)',
+        disabledText: 'rgba(10, 10, 10, 0.35)',
+        pressed: 'rgba(10, 10, 10, 0.08)',
+        overlay: 'rgba(0, 0, 0, 0.50)',
 
         // components
-        inputBackground: 'rgba(255, 255, 255, 0.60)',
-        inputBorder: 'rgba(27, 38, 50, 0.10)',
-        cardBackground: 'rgba(255, 255, 255, 0.55)',
-        tabBarBackground: palette.palladian,
-        divider: 'rgba(27, 38, 50, 0.08)',
+        inputBackground: palette.white,
+        inputBorder: 'rgba(10, 10, 10, 0.12)',
+        cardBackground: palette.white,
+        tabBarBackground: palette.white,
+        divider: 'rgba(10, 10, 10, 0.08)',
     },
     typography: baseTypography,
     spacing: baseSpacing,
@@ -208,66 +216,88 @@ export const lightTheme = {
     shadows: baseShadows,
 };
 
-// DARK THEME
+// DARK THEME - Near-Black Version
 export const darkTheme = {
     mode: 'dark' as const,
     palette,
     colors: {
         // brand intent
-        primary: palette.blueFantastic,
-        primaryLight: 'rgba(44, 59, 77, 0.92)',
-        primaryDark: palette.abyssalAnchorfishBlue,
+        primary: palette.burningFlame,
+        primaryLight: palette.burningFlame,
+        primaryDark: palette.truffleTrouble,
 
         // accents
-        secondary: palette.burningFlame,
-        accent: palette.truffleTrouble,
+        secondary: palette.truffleTrouble,
+        accent: palette.burningFlame,
 
-        // backgrounds
-        background: palette.abyssalAnchorfishBlue,
-        backgroundSecondary: palette.blueFantastic,
-        backgroundTertiary: 'rgba(44, 59, 77, 0.85)',
+        // backgrounds - much darker, near-black
+        background: palette.nearBlack,
+        backgroundSecondary: palette.darkGray,
+        backgroundTertiary: palette.darkGray2,
 
-        // surfaces
-        surface: 'rgba(255, 255, 255, 0.06)',
-        surfaceMuted: 'rgba(255, 255, 255, 0.04)',
-        surfaceElevated: 'rgba(255, 255, 255, 0.08)',
+        // surfaces - subtle elevation on dark
+        surface: 'rgba(255, 255, 255, 0.04)',
+        surfaceMuted: 'rgba(255, 255, 255, 0.02)',
+        surfaceElevated: palette.darkGray3,
 
         // text
         text: palette.palladian,
         textSecondary: 'rgba(238, 233, 223, 0.75)',
-        textTertiary: 'rgba(238, 233, 223, 0.55)',
-        textInverse: palette.abyssalAnchorfishBlue,
-        textOnPrimary: palette.palladian,
+        textTertiary: 'rgba(238, 233, 223, 0.50)',
+        textInverse: palette.nearBlack,
+        textOnPrimary: palette.nearBlack,
 
-        // borders
-        border: 'rgba(238, 233, 223, 0.10)',
-        borderLight: 'rgba(238, 233, 223, 0.06)',
-        borderDark: 'rgba(0, 0, 0, 0.55)',
+        // borders - subtle on dark
+        border: 'rgba(255, 255, 255, 0.08)',
+        borderLight: 'rgba(255, 255, 255, 0.04)',
+        borderDark: 'rgba(255, 255, 255, 0.12)',
 
         // feedback
         success: palette.green500,
-        error: palette.red500,
+        error: '#EF5350',
         warning: palette.amber500,
         info: palette.burningFlame,
-        errorBackground: 'rgba(198, 40, 40, 0.18)',
+        errorBackground: 'rgba(239, 83, 80, 0.15)',
 
         // states
-        disabled: 'rgba(238, 233, 223, 0.12)',
-        disabledText: 'rgba(238, 233, 223, 0.45)',
-        pressed: 'rgba(238, 233, 223, 0.08)',
-        overlay: 'rgba(0, 0, 0, 0.70)',
+        disabled: 'rgba(255, 255, 255, 0.06)',
+        disabledText: 'rgba(238, 233, 223, 0.35)',
+        pressed: 'rgba(255, 255, 255, 0.08)',
+        overlay: 'rgba(0, 0, 0, 0.85)',
 
         // components
-        inputBackground: 'rgba(255, 255, 255, 0.06)',
-        inputBorder: 'rgba(238, 233, 223, 0.12)',
-        cardBackground: 'rgba(255, 255, 255, 0.06)',
-        tabBarBackground: palette.abyssalAnchorfishBlue,
-        divider: 'rgba(238, 233, 223, 0.10)',
+        inputBackground: 'rgba(255, 255, 255, 0.04)',
+        inputBorder: 'rgba(255, 255, 255, 0.08)',
+        cardBackground: 'rgba(255, 255, 255, 0.03)',
+        tabBarBackground: palette.trueBlack,
+        divider: 'rgba(255, 255, 255, 0.06)',
     },
     typography: baseTypography,
     spacing: baseSpacing,
     borderRadius: baseRadius,
-    shadows: baseShadows,
+    shadows: {
+        sm: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.5,
+            shadowRadius: 2,
+            elevation: 1,
+        },
+        base: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.6,
+            shadowRadius: 6,
+            elevation: 3,
+        },
+        md: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.7,
+            shadowRadius: 10,
+            elevation: 5,
+        },
+    },
 };
 
 export type Theme = typeof lightTheme | typeof darkTheme;

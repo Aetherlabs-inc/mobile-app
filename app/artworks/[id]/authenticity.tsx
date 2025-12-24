@@ -82,47 +82,65 @@ export default function AuthenticityCertificateScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+      {/* Simple Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={[styles.backButton, { backgroundColor: theme.colors.surface }]}
+        >
+          <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView
         style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Certificate Header with Shiny Background */}
-        <View style={[styles.certificateHeaderGradient, {
-          backgroundColor: '#1a1a3e',
-        }]}>
-          <View style={styles.certificateHeader}>
-            {/* AetherLabs Logo */}
-            <View style={styles.logoContainer}>
-              <Image
-                source={require('@/assets/images/icon.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </View>
-            
-            {/* Seal with Shiny Background */}
-            <View style={[styles.sealGradient, {
-              backgroundColor: '#f5f5f5',
-            }]}>
-              <View style={[styles.sealContainer, { borderColor: theme.colors.primary }]}>
-                <Ionicons name="shield-checkmark" size={40} color={theme.colors.primary} />
-              </View>
-            </View>
-            
-            <Text style={[styles.certificateTitle, { color: '#ffffff' }]}>
-              CERTIFICATE OF AUTHENTICITY
-            </Text>
-            <View style={[styles.divider, { backgroundColor: 'rgba(255,255,255,0.3)' }]} />
-            <Text style={[styles.brandText, { color: 'rgba(255,255,255,0.8)' }]}>
-              AETHERLABS
-            </Text>
+        {/* Big Title Section */}
+        <View style={styles.titleSection}>
+          <View style={[styles.certificateIconContainer, { 
+            backgroundColor: theme.colors.primary + '15',
+          }]}>
+            <Ionicons name="shield-checkmark" size={48} color={theme.colors.primary} />
           </View>
+          <Text style={[styles.mainTitle, { color: theme.colors.text }]}>
+            Certificate of{'\n'}Authenticity
+          </Text>
+          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+            Official verification document
+          </Text>
         </View>
 
-        {/* Artwork Image */}
+        {/* Status Badge */}
+        <View style={styles.statusContainer}>
+          {artwork.status === 'verified' ? (
+            <View style={[styles.statusBadge, {
+              backgroundColor: theme.colors.success + '15',
+            }]}>
+              <Ionicons name="checkmark-circle" size={24} color={theme.colors.success} />
+              <Text style={[styles.statusText, { color: theme.colors.success }]}>
+                Verified Authentic
+              </Text>
+            </View>
+          ) : (
+            <View style={[styles.statusBadge, {
+              backgroundColor: theme.colors.warning + '15',
+            }]}>
+              <Ionicons name="time-outline" size={24} color={theme.colors.warning} />
+              <Text style={[styles.statusText, { color: theme.colors.warning }]}>
+                Pending Verification
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Artwork Image Card */}
         {artwork.image_url && !imageError && (
-          <View style={styles.imageContainer}>
+          <View style={[styles.imageCard, {
+            backgroundColor: theme.colors.surface,
+            ...theme.shadows.base,
+          }]}>
             <Image
               source={{ uri: artwork.image_url }}
               style={styles.artworkImage}
@@ -132,142 +150,163 @@ export default function AuthenticityCertificateScreen() {
           </View>
         )}
 
-        {/* Certificate Body with Shiny Background */}
-        <View style={[styles.certificateBodyGradient, {
-          backgroundColor: '#fafafa',
+        {/* Artwork Information Card */}
+        <View style={[styles.infoCard, {
+          backgroundColor: theme.colors.surface,
+          ...theme.shadows.base,
         }]}>
-          <View style={[styles.certificateBody, {
-            backgroundColor: 'transparent',
-            borderColor: theme.colors.border,
-            ...theme.shadows.base,
-          }]}>
-          {/* Artwork Information */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionLabel, { color: theme.colors.textSecondary }]}>
-              ARTWORK INFORMATION
+          <View style={styles.cardHeader}>
+            <View style={[styles.cardIconContainer, { backgroundColor: theme.colors.surfaceMuted }]}>
+              <Ionicons name="brush-outline" size={20} color={theme.colors.primary} />
+            </View>
+            <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
+              Artwork Details
             </Text>
-            <View style={[styles.sectionDivider, { backgroundColor: theme.colors.border }]} />
-            
-            <View style={styles.artworkInfo}>
-              <Text style={[styles.artworkTitle, { color: theme.colors.text }]}>
-                {artwork.title}
-              </Text>
+          </View>
+          
+          <View style={styles.artworkInfo}>
+            <Text style={[styles.artworkTitle, { color: theme.colors.text }]}>
+              {artwork.title}
+            </Text>
+            <View style={styles.artistRow}>
+              <Ionicons name="person-outline" size={16} color={theme.colors.textSecondary} />
               <Text style={[styles.artworkArtist, { color: theme.colors.textSecondary }]}>
-                by {artwork.artist}
+                {artwork.artist}
               </Text>
             </View>
           </View>
 
-          {/* Technical Details */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionLabel, { color: theme.colors.textSecondary }]}>
-              TECHNICAL DETAILS
-            </Text>
-            <View style={[styles.sectionDivider, { backgroundColor: theme.colors.border }]} />
-            
-            <View style={styles.detailsList}>
-              <View style={styles.detailRow}>
+          <View style={styles.detailsList}>
+            <View style={styles.detailRow}>
+              <View style={styles.detailLeft}>
+                <Ionicons name="calendar-outline" size={18} color={theme.colors.primary} />
                 <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
-                  Year of Creation:
-                </Text>
-                <Text style={[styles.detailValue, { color: theme.colors.text }]}>
-                  {artwork.year}
+                  Year Created
                 </Text>
               </View>
-              <View style={styles.detailRow}>
-                <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
-                  Medium:
-                </Text>
-                <Text style={[styles.detailValue, { color: theme.colors.text }]}>
-                  {artwork.medium}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
-                  Dimensions:
-                </Text>
-                <Text style={[styles.detailValue, { color: theme.colors.text }]}>
-                  {artwork.dimensions}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Authentication */}
-          {certificate && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionLabel, { color: theme.colors.textSecondary }]}>
-                AUTHENTICATION
+              <Text style={[styles.detailValue, { color: theme.colors.text }]}>
+                {artwork.year}
               </Text>
-              <View style={[styles.sectionDivider, { backgroundColor: theme.colors.border }]} />
-              
-              <View style={styles.detailsList}>
-                <View style={styles.detailRow}>
-                  <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
-                    Certificate ID:
-                  </Text>
-                  <Text style={[styles.detailValue, styles.monospace, { color: theme.colors.primary }]}>
-                    {certificate.certificate_id}
-                  </Text>
-                </View>
-                {certificate.blockchain_hash && (
-                  <View style={styles.detailRow}>
-                    <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
-                      Blockchain Hash:
-                    </Text>
-                    <Text style={[styles.detailValue, styles.monospace, { color: theme.colors.text }]} numberOfLines={1}>
-                      {certificate.blockchain_hash}
-                    </Text>
-                  </View>
-                )}
-                {nfcTag && (
-                  <View style={styles.detailRow}>
-                    <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
-                      NFC Tag UID:
-                    </Text>
-                    <Text style={[styles.detailValue, styles.monospace, { color: theme.colors.primary }]}>
-                      {nfcTag.nfc_uid}
-                    </Text>
-                  </View>
-                )}
-              </View>
             </View>
-          )}
 
-          {/* Status */}
-          <View style={styles.statusSection}>
-            {artwork.status === 'verified' ? (
-              <View style={[styles.verifiedBadge, {
-                backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                borderColor: theme.colors.success,
-              }]}>
-                <Ionicons name="checkmark-circle" size={20} color={theme.colors.success} />
-                <Text style={[styles.verifiedText, { color: theme.colors.success }]}>
-                  VERIFIED AUTHENTIC
+            <View style={styles.detailRow}>
+              <View style={styles.detailLeft}>
+                <Ionicons name="color-palette-outline" size={18} color={theme.colors.primary} />
+                <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
+                  Medium
                 </Text>
               </View>
-            ) : (
-              <View style={[styles.verifiedBadge, {
-                backgroundColor: 'rgba(255, 152, 0, 0.1)',
-                borderColor: theme.colors.warning,
-              }]}>
-                <Ionicons name="time-outline" size={20} color={theme.colors.warning} />
-                <Text style={[styles.verifiedText, { color: theme.colors.warning }]}>
-                  PENDING VERIFICATION
+              <Text style={[styles.detailValue, { color: theme.colors.text }]}>
+                {artwork.medium}
+              </Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <View style={styles.detailLeft}>
+                <Ionicons name="resize-outline" size={18} color={theme.colors.primary} />
+                <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
+                  Dimensions
                 </Text>
               </View>
-            )}
-          </View>
+              <Text style={[styles.detailValue, { color: theme.colors.text }]}>
+                {artwork.dimensions}
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* Footer */}
+        {/* Authentication Card */}
+        {certificate && (
+          <View style={[styles.infoCard, {
+            backgroundColor: theme.colors.surface,
+            ...theme.shadows.base,
+          }]}>
+            <View style={styles.cardHeader}>
+              <View style={[styles.cardIconContainer, { backgroundColor: theme.colors.surfaceMuted }]}>
+                <Ionicons name="finger-print-outline" size={20} color={theme.colors.primary} />
+              </View>
+              <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
+                Authentication
+              </Text>
+            </View>
+            
+            <View style={styles.detailsList}>
+              <View style={styles.detailRow}>
+                <View style={styles.detailLeft}>
+                  <Ionicons name="document-text-outline" size={18} color={theme.colors.primary} />
+                  <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
+                    Certificate ID
+                  </Text>
+                </View>
+                <Text style={[styles.detailValue, styles.monospace, { color: theme.colors.primary }]} numberOfLines={1}>
+                  {certificate.certificate_id}
+                </Text>
+              </View>
+
+              {certificate.blockchain_hash && (
+                <View style={styles.detailRow}>
+                  <View style={styles.detailLeft}>
+                    <Ionicons name="cube-outline" size={18} color={theme.colors.primary} />
+                    <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
+                      Blockchain Hash
+                    </Text>
+                  </View>
+                  <Text style={[styles.detailValue, styles.monospace, { color: theme.colors.text }]} numberOfLines={1}>
+                    {certificate.blockchain_hash.substring(0, 12)}...
+                  </Text>
+                </View>
+              )}
+
+              {nfcTag && (
+                <View style={styles.detailRow}>
+                  <View style={styles.detailLeft}>
+                    <Ionicons name="wifi-outline" size={18} color={theme.colors.primary} />
+                    <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
+                      NFC Tag UID
+                    </Text>
+                  </View>
+                  <Text style={[styles.detailValue, styles.monospace, { color: theme.colors.primary }]}>
+                    {nfcTag.nfc_uid}
+                  </Text>
+                </View>
+              )}
+
+              <View style={styles.detailRow}>
+                <View style={styles.detailLeft}>
+                  <Ionicons name="time-outline" size={18} color={theme.colors.primary} />
+                  <Text style={[styles.detailLabel, { color: theme.colors.textSecondary }]}>
+                    Issued Date
+                  </Text>
+                </View>
+                <Text style={[styles.detailValue, { color: theme.colors.text }]}>
+                  {new Date(certificate.created_at).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Brand Footer */}
         <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: theme.colors.textTertiary }]}>
-            This certificate verifies the authenticity of the artwork listed above.
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('@/assets/images/icon.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+          <Text style={[styles.brandText, { color: theme.colors.text }]}>
+            AetherLabs
           </Text>
           <Text style={[styles.footerText, { color: theme.colors.textTertiary }]}>
-            Scan the NFC tag or QR code to verify this certificate.
+            Digital authenticity verification platform
+          </Text>
+          <Text style={[styles.footerSubtext, { color: theme.colors.textTertiary }]}>
+            Scan the NFC tag to verify this certificate
           </Text>
         </View>
       </ScrollView>
@@ -295,188 +334,182 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 16,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingBottom: 40,
   },
-  certificateHeaderGradient: {
-    width: '100%',
-    paddingTop: 40,
+  titleSection: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
     paddingBottom: 32,
-    marginBottom: 24,
-  },
-  certificateHeader: {
     alignItems: 'center',
-    paddingHorizontal: 20,
   },
-  logoContainer: {
-    width: 80,
-    height: 80,
-    marginBottom: 20,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+  certificateIconContainer: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 24,
+  },
+  mainTitle: {
+    fontSize: 42,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+    lineHeight: 48,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  statusContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 20,
+    gap: 12,
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  imageCard: {
+    marginHorizontal: 24,
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 24,
+  },
+  artworkImage: {
+    width: '100%',
+    aspectRatio: 1,
+  },
+  infoCard: {
+    marginHorizontal: 24,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 12,
+  },
+  cardIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  artworkInfo: {
+    marginBottom: 20,
+  },
+  artworkTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 12,
+    lineHeight: 34,
+  },
+  artistRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  artworkArtist: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  detailsList: {
+    gap: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 16,
+  },
+  detailLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  detailValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'right',
+    flexShrink: 1,
+  },
+  monospace: {
+    fontFamily: 'monospace',
+    fontSize: 13,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 20,
+    alignItems: 'center',
+    gap: 8,
+  },
+  logoContainer: {
+    width: 60,
+    height: 60,
+    marginBottom: 12,
+    borderRadius: 30,
     overflow: 'hidden',
   },
   logo: {
     width: 60,
     height: 60,
   },
-  sealGradient: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sealContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.95)',
-  },
   brandText: {
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: '700',
-    letterSpacing: 4,
-    marginTop: 8,
-    fontFamily: 'monospace',
-  },
-  certificateTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 3,
-    marginBottom: 12,
-    fontFamily: 'monospace',
-  },
-  divider: {
-    width: 80,
-    height: 2,
-  },
-  imageContainer: {
-    width: '100%',
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  artworkImage: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: 12,
-  },
-  certificateBodyGradient: {
-    marginHorizontal: 20,
-    borderRadius: 16,
-    borderWidth: 2,
-    marginBottom: 24,
-    overflow: 'hidden',
-  },
-  certificateBody: {
-    borderRadius: 16,
-    padding: 24,
-  },
-  section: {
-    marginBottom: 32,
-  },
-  sectionLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 2,
-    marginBottom: 8,
-    fontFamily: 'monospace',
-  },
-  sectionDivider: {
-    width: '100%',
-    height: 1,
-    marginBottom: 16,
-  },
-  artworkInfo: {
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  artworkTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 8,
-    textAlign: 'center',
-    fontFamily: 'monospace',
-  },
-  artworkArtist: {
-    fontSize: 16,
-    fontWeight: '500',
-    fontStyle: 'italic',
-    fontFamily: 'monospace',
-  },
-  detailsList: {
-    gap: 12,
-    marginTop: 8,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  detailLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    flex: 1,
-    fontFamily: 'monospace',
-  },
-  detailValue: {
-    fontSize: 12,
-    fontWeight: '500',
-    flex: 1,
-    textAlign: 'right',
-  },
-  monospace: {
-    fontFamily: 'monospace',
-    letterSpacing: 0.5,
-  },
-  statusSection: {
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  verifiedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
-    borderWidth: 2,
-    gap: 8,
-  },
-  verifiedText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.5,
-    fontFamily: 'monospace',
-  },
-  footer: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    alignItems: 'center',
-    gap: 8,
+    marginBottom: 4,
   },
   footerText: {
-    fontSize: 11,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 16,
-    fontFamily: 'monospace',
+    lineHeight: 20,
   },
-  backButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+  footerSubtext: {
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginTop: 4,
   },
 });
 

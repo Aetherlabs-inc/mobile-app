@@ -189,25 +189,17 @@ export default function ArtworkDetailScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
             <ScrollView
                 style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header */}
-                <View style={[styles.header, {
-                    backgroundColor: theme.colors.surface,
-                    borderBottomColor: theme.colors.border,
-                }]}>
+                {/* Top Header */}
+                <View style={styles.topHeader}>
                     <TouchableOpacity
                         onPress={() => router.back()}
-                        style={[styles.backButton, {
-                            backgroundColor: theme.colors.surfaceMuted,
-                        }]}
+                        style={styles.backButton}
                     >
-                        <Ionicons name="arrow-back" size={20} color={theme.colors.text} />
+                        <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
                     </TouchableOpacity>
-                    <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
-                        Artwork Details
-                    </Text>
-                    <View style={styles.placeholder} />
                 </View>
 
                 {/* Hero Image */}
@@ -221,7 +213,10 @@ export default function ArtworkDetailScreen() {
                         }}
                         disabled={!artwork.image_url || imageError}
                     >
-                        <View style={[styles.heroImageContainer, { backgroundColor: theme.colors.surfaceMuted }]}>
+                        <View style={[styles.heroImageContainer, {
+                            backgroundColor: theme.colors.surfaceMuted,
+                            ...theme.shadows.md,
+                        }]}>
                             {artwork.image_url && !imageError ? (
                                 <>
                                     {imageLoading && (
@@ -254,11 +249,14 @@ export default function ArtworkDetailScreen() {
                                         }}
                                     />
                                     {!imageLoading && (
-                                        <View style={[styles.imageOverlay, { backgroundColor: 'rgba(0,0,0,0.3)' }]}>
-                                            <View style={[styles.imageOverlayBadge, { backgroundColor: 'rgba(255,255,255,0.9)' }]}>
-                                                <Ionicons name="expand-outline" size={18} color={theme.colors.text} />
+                                        <View style={[styles.imageOverlay, { backgroundColor: 'rgba(0,0,0,0.2)' }]}>
+                                            <View style={[styles.imageOverlayBadge, {
+                                                backgroundColor: theme.colors.surfaceElevated,
+                                                ...theme.shadows.sm,
+                                            }]}>
+                                                <Ionicons name="expand-outline" size={16} color={theme.colors.text} />
                                                 <Text style={[styles.imageOverlayText, { color: theme.colors.text }]}>
-                                                    Tap to view full screen
+                                                    Tap to expand
                                                 </Text>
                                             </View>
                                         </View>
@@ -316,105 +314,130 @@ export default function ArtworkDetailScreen() {
                     </View>
                 </Modal>
 
-                {/* Content */}
-                <View style={styles.content}>
-                    {/* Title Section */}
-                    <View style={styles.titleSection}>
-                        <View style={[styles.statusBadge, {
-                            backgroundColor: artwork.status === 'verified'
-                                ? 'rgba(76, 175, 80, 0.1)'
-                                : 'rgba(255, 152, 0, 0.1)',
-                        }]}>
-                            {artwork.status === 'verified' ? (
-                                <>
-                                    <Ionicons name="checkmark-circle" size={16} color={theme.colors.success} />
-                                    <Text style={[styles.statusText, { color: theme.colors.success }]}>
-                                        Verified
-                                    </Text>
-                                </>
-                            ) : (
-                                <>
-                                    <Ionicons name="time-outline" size={16} color={theme.colors.warning} />
-                                    <Text style={[styles.statusText, { color: theme.colors.warning }]}>
-                                        Unverified
-                                    </Text>
-                                </>
-                            )}
-                        </View>
-                        <Text style={[styles.title, { color: theme.colors.text }]}>
-                            {artwork.title}
-                        </Text>
-                        <Text style={[styles.artist, { color: theme.colors.textSecondary }]}>
-                            By {artwork.artist}
+                {/* Title Section */}
+                <View style={styles.titleSection}>
+                    <View style={[styles.statusBadge, {
+                        backgroundColor: artwork.status === 'verified'
+                            ? theme.colors.success + '20'
+                            : theme.colors.warning + '20',
+                    }]}>
+                        {artwork.status === 'verified' ? (
+                            <>
+                                <Ionicons name="checkmark-circle" size={16} color={theme.colors.success} />
+                                <Text style={[styles.statusText, { color: theme.colors.success }]}>
+                                    Verified
+                                </Text>
+                            </>
+                        ) : (
+                            <>
+                                <Ionicons name="time-outline" size={16} color={theme.colors.warning} />
+                                <Text style={[styles.statusText, { color: theme.colors.warning }]}>
+                                    Unverified
+                                </Text>
+                            </>
+                        )}
+                    </View>
+                    <Text style={[styles.greetingText, { color: theme.colors.text }]}>
+                        {artwork.title}
+                    </Text>
+                    <View style={styles.artistRow}>
+                        <Ionicons name="person-outline" size={18} color={theme.colors.textSecondary} />
+                        <Text style={[styles.artistText, { color: theme.colors.textSecondary }]}>
+                            {artwork.artist}
                         </Text>
                     </View>
+                </View>
+
+                {/* Content */}
+                <View style={styles.content}>
 
                     {/* Metadata Card */}
                     <View style={[styles.metadataCard, {
                         backgroundColor: theme.colors.surface,
-                        borderColor: theme.colors.border,
+                        borderRadius: theme.borderRadius?.lg || 16,
                         ...theme.shadows.base,
                     }]}>
-                        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-                            Details
-                        </Text>
+                        <View style={styles.sectionHeader}>
+                            <View style={[styles.sectionIconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
+                                <Ionicons name="information-circle" size={20} color={theme.colors.primary} />
+                            </View>
+                            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                                Artwork Details
+                            </Text>
+                        </View>
                         <View style={styles.metadata}>
                             <View style={[styles.metadataRow, { borderBottomColor: theme.colors.border }]}>
                                 <View style={styles.metadataItem}>
-                                    <Ionicons name="calendar-outline" size={18} color={theme.colors.textTertiary} />
-                                    <Text style={[styles.metadataLabel, { color: theme.colors.textSecondary }]}>
-                                        Year
-                                    </Text>
+                                    <View style={[styles.metadataIconContainer, { backgroundColor: theme.colors.primary + '10' }]}>
+                                        <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
+                                    </View>
+                                    <View style={styles.metadataTextContainer}>
+                                        <Text style={[styles.metadataLabel, { color: theme.colors.textSecondary }]}>
+                                            Year Created
+                                        </Text>
+                                        <Text style={[styles.metadataValue, { color: theme.colors.text }]}>
+                                            {artwork.year}
+                                        </Text>
+                                    </View>
                                 </View>
-                                <Text style={[styles.metadataValue, { color: theme.colors.text }]}>
-                                    {artwork.year}
-                                </Text>
                             </View>
                             <View style={[styles.metadataRow, { borderBottomColor: theme.colors.border }]}>
                                 <View style={styles.metadataItem}>
-                                    <Ionicons name="brush-outline" size={18} color={theme.colors.textTertiary} />
-                                    <Text style={[styles.metadataLabel, { color: theme.colors.textSecondary }]}>
-                                        Medium
-                                    </Text>
+                                    <View style={[styles.metadataIconContainer, { backgroundColor: theme.colors.secondary + '10' }]}>
+                                        <Ionicons name="brush-outline" size={20} color={theme.colors.secondary} />
+                                    </View>
+                                    <View style={styles.metadataTextContainer}>
+                                        <Text style={[styles.metadataLabel, { color: theme.colors.textSecondary }]}>
+                                            Medium
+                                        </Text>
+                                        <Text style={[styles.metadataValue, { color: theme.colors.text }]}>
+                                            {artwork.medium}
+                                        </Text>
+                                    </View>
                                 </View>
-                                <Text style={[styles.metadataValue, { color: theme.colors.text }]}>
-                                    {artwork.medium}
-                                </Text>
                             </View>
                             <View style={[styles.metadataRow, { borderBottomColor: theme.colors.border }]}>
                                 <View style={styles.metadataItem}>
-                                    <Ionicons name="resize-outline" size={18} color={theme.colors.textTertiary} />
-                                    <Text style={[styles.metadataLabel, { color: theme.colors.textSecondary }]}>
-                                        Dimensions
-                                    </Text>
+                                    <View style={[styles.metadataIconContainer, { backgroundColor: theme.colors.accent + '10' }]}>
+                                        <Ionicons name="resize-outline" size={20} color={theme.colors.accent} />
+                                    </View>
+                                    <View style={styles.metadataTextContainer}>
+                                        <Text style={[styles.metadataLabel, { color: theme.colors.textSecondary }]}>
+                                            Dimensions
+                                        </Text>
+                                        <Text style={[styles.metadataValue, { color: theme.colors.text }]}>
+                                            {artwork.dimensions}
+                                        </Text>
+                                    </View>
                                 </View>
-                                <Text style={[styles.metadataValue, { color: theme.colors.text }]}>
-                                    {artwork.dimensions}
-                                </Text>
                             </View>
                             {nfcTag && (
-                                <View style={styles.metadataRow}>
+                                <View style={[styles.metadataRow, styles.nfcRow]}>
                                     <View style={styles.metadataItem}>
-                                        <Ionicons name="radio-outline" size={18} color={theme.colors.textTertiary} />
-                                        <View style={styles.nfcTagContainer}>
+                                        <View style={[styles.metadataIconContainer, { backgroundColor: theme.colors.info + '10' }]}>
+                                            <Ionicons name="radio-outline" size={20} color={theme.colors.info} />
+                                        </View>
+                                        <View style={styles.metadataTextContainer}>
                                             <Text style={[styles.metadataLabel, { color: theme.colors.textSecondary }]}>
-                                                NFC Tag
+                                                NFC Tag ID
                                             </Text>
-                                            <Text style={[styles.nfcTagValue, { color: theme.colors.primary }]}>
-                                                {nfcTag.nfc_uid}
-                                            </Text>
+                                            <View style={styles.nfcTagContainer}>
+                                                <Text style={[styles.nfcTagValue, { color: theme.colors.primary }]}>
+                                                    {nfcTag.nfc_uid}
+                                                </Text>
+                                                {isOwner && (
+                                                    <TouchableOpacity
+                                                        onPress={handleUnlinkNfc}
+                                                        style={[styles.unlinkButton, {
+                                                            backgroundColor: theme.colors.errorBackground,
+                                                        }]}
+                                                    >
+                                                        <Ionicons name="close-circle" size={18} color={theme.colors.error} />
+                                                    </TouchableOpacity>
+                                                )}
+                                            </View>
                                         </View>
                                     </View>
-                                    {isOwner && (
-                                        <TouchableOpacity
-                                            onPress={handleUnlinkNfc}
-                                            style={[styles.unlinkButton, {
-                                                backgroundColor: theme.colors.errorBackground,
-                                            }]}
-                                        >
-                                            <Ionicons name="close-circle" size={20} color={theme.colors.error} />
-                                        </TouchableOpacity>
-                                    )}
                                 </View>
                             )}
                         </View>
@@ -425,57 +448,60 @@ export default function ArtworkDetailScreen() {
                         <TouchableOpacity
                             style={[styles.actionButton, {
                                 backgroundColor: theme.colors.surface,
-                                borderColor: theme.colors.border,
-                                ...theme.shadows.sm,
+                                borderRadius: theme.borderRadius?.lg || 16,
+                                ...theme.shadows.base,
                             }]}
                             onPress={() => router.push(`/artworks/${artwork.id}/authenticity`)}
                             activeOpacity={0.7}
                         >
-                            <View style={[styles.actionIconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
-                                <Ionicons name="document-text" size={22} color={theme.colors.primary} />
+                            <View style={[styles.actionIconContainer, { backgroundColor: theme.colors.surfaceMuted }]}>
+                                <Ionicons name="document-text-outline" size={28} color={theme.colors.primary} />
                             </View>
                             <View style={styles.actionTextContainer}>
-                                <Text style={[styles.actionButtonText, { color: theme.colors.text }]}>
+                                <Text style={[styles.actionCardTitle, { color: theme.colors.text }]}>
                                     View Certificate
                                 </Text>
-                                <Text style={[styles.actionButtonSubtext, { color: theme.colors.textTertiary }]}>
+                                <Text style={[styles.actionCardSubtitle, { color: theme.colors.textSecondary }]}>
                                     Digital certificate of authenticity
                                 </Text>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color={theme.colors.textTertiary} />
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.actionButton, {
                                 backgroundColor: theme.colors.surface,
-                                borderColor: theme.colors.border,
-                                ...theme.shadows.sm,
+                                borderRadius: theme.borderRadius?.lg || 16,
+                                ...theme.shadows.base,
                             }]}
                             activeOpacity={0.7}
                         >
-                            <View style={[styles.actionIconContainer, { backgroundColor: theme.colors.info + '15' }]}>
-                                <Ionicons name="share-outline" size={22} color={theme.colors.info} />
+                            <View style={[styles.actionIconContainer, { backgroundColor: theme.colors.surfaceMuted }]}>
+                                <Ionicons name="share-outline" size={28} color={theme.colors.primary} />
                             </View>
                             <View style={styles.actionTextContainer}>
-                                <Text style={[styles.actionButtonText, { color: theme.colors.text }]}>
+                                <Text style={[styles.actionCardTitle, { color: theme.colors.text }]}>
                                     Share Artwork
                                 </Text>
-                                <Text style={[styles.actionButtonSubtext, { color: theme.colors.textTertiary }]}>
+                                <Text style={[styles.actionCardSubtitle, { color: theme.colors.textSecondary }]}>
                                     Share with others
                                 </Text>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color={theme.colors.textTertiary} />
                         </TouchableOpacity>
                     </View>
 
                     {/* Owner Actions */}
                     {isOwner && (
-                        <View style={styles.ownerSection}>
+                        <View style={[styles.ownerSection, {
+                            backgroundColor: theme.colors.surface,
+                            borderRadius: theme.borderRadius?.lg || 16,
+                            ...theme.shadows.base,
+                        }]}>
                             <View style={styles.ownerHeader}>
-                                <View style={[styles.ownerDividerLine, { backgroundColor: theme.colors.border }]} />
-                                <Text style={[styles.ownerLabel, { color: theme.colors.textSecondary }]}>
+                                <View style={[styles.ownerIconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
+                                    <Ionicons name="settings-outline" size={18} color={theme.colors.primary} />
+                                </View>
+                                <Text style={[styles.ownerLabel, { color: theme.colors.text }]}>
                                     Owner Controls
                                 </Text>
-                                <View style={[styles.ownerDividerLine, { backgroundColor: theme.colors.border }]} />
                             </View>
                             <View style={styles.ownerActions}>
                                 <TouchableOpacity
@@ -531,6 +557,7 @@ export default function ArtworkDetailScreen() {
                         </View>
                     )}
                 </View>
+                <View style={{ height: 100 }} />
             </ScrollView>
         </SafeAreaView>
     );
@@ -559,33 +586,27 @@ const styles = StyleSheet.create({
     scrollView: {
         flex: 1,
     },
-    header: {
+    scrollContent: {
+        paddingBottom: 20,
+    },
+    topHeader: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
+        paddingHorizontal: 24,
+        paddingTop: 12,
+        paddingBottom: 8,
     },
     backButton: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        width: 40,
+        height: 40,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    headerTitle: {
-        flex: 1,
-        fontSize: 17,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-    placeholder: {
-        width: 36,
-    },
     imageWrapper: {
-        paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 8,
+        paddingHorizontal: 24,
+        paddingTop: 8,
+        paddingBottom: 28,
     },
     heroImageContainer: {
         width: '100%',
@@ -594,7 +615,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         overflow: 'hidden',
         position: 'relative',
-        borderRadius: 16,
+        borderRadius: 20,
     },
     heroImageContent: {
         width: '100%',
@@ -627,13 +648,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 24,
         gap: 6,
     },
     imageOverlayText: {
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: '600',
     },
     imagePlaceholderContainer: {
@@ -705,134 +726,171 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: 'rgba(255,255,255,0.8)',
     },
-    content: {
-        padding: 20,
-        gap: 24,
-    },
     titleSection: {
-        gap: 8,
+        paddingHorizontal: 24,
+        paddingBottom: 28,
+        gap: 12,
+    },
+    content: {
+        paddingHorizontal: 24,
+        gap: 12,
     },
     statusBadge: {
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'flex-start',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 16,
         gap: 6,
     },
     statusText: {
         fontSize: 13,
         fontWeight: '600',
     },
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        lineHeight: 38,
-        letterSpacing: -0.5,
+    greetingText: {
+        fontSize: 40,
+        fontWeight: '600',
+        marginBottom: 1,
     },
-    artist: {
-        fontSize: 18,
-        fontWeight: '500',
+    greetingSubtext: {
+        fontSize: 45,
+        fontWeight: 'bold',
+    },
+    artistRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
         marginTop: 4,
     },
+    artistText: {
+        fontSize: 18,
+        fontWeight: '500',
+    },
     metadataCard: {
-        borderRadius: 16,
         padding: 20,
-        borderWidth: 1,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 20,
+    },
+    sectionIconContainer: {
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     sectionTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 16,
+        fontSize: 19,
+        fontWeight: '700',
+        letterSpacing: -0.3,
     },
     metadata: {
         gap: 0,
     },
     metadataRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 14,
+        paddingVertical: 16,
         borderBottomWidth: 1,
+    },
+    nfcRow: {
+        borderBottomWidth: 0,
     },
     metadataItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: 14,
         flex: 1,
     },
-    metadataLabel: {
-        fontSize: 15,
-        fontWeight: '500',
-    },
-    metadataValue: {
-        fontSize: 15,
-        fontWeight: '600',
-        textAlign: 'right',
-        flex: 1,
-    },
-    nfcTagContainer: {
-        flex: 1,
-    },
-    nfcTagValue: {
-        fontSize: 13,
-        fontWeight: '600',
-        marginTop: 2,
-        fontFamily: 'monospace',
-    },
-    unlinkButton: {
-        padding: 6,
-        borderRadius: 12,
-    },
-    actionsSection: {
-        gap: 12,
-    },
-    actionButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: 16,
-        padding: 16,
-        borderWidth: 1,
-        gap: 12,
-    },
-    actionIconContainer: {
+    metadataIconContainer: {
         width: 44,
         height: 44,
         borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    actionTextContainer: {
+    metadataTextContainer: {
         flex: 1,
+        gap: 4,
     },
-    actionButtonText: {
+    metadataLabel: {
+        fontSize: 13,
+        fontWeight: '500',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    metadataValue: {
         fontSize: 16,
         fontWeight: '600',
-        marginBottom: 2,
+        marginTop: 2,
     },
-    actionButtonSubtext: {
+    nfcTagContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 4,
+    },
+    nfcTagValue: {
+        fontSize: 14,
+        fontWeight: '600',
+        fontFamily: 'monospace',
+        flex: 1,
+    },
+    unlinkButton: {
+        padding: 6,
+        borderRadius: 10,
+    },
+    actionsSection: {
+        gap: 12,
+    },
+    actionButton: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        padding: 20,
+        gap: 16,
+    },
+    actionIconContainer: {
+        width: 56,
+        height: 56,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    actionTextContainer: {
+        flex: 1,
+        gap: 4,
+    },
+    actionCardTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 4,
+    },
+    actionCardSubtitle: {
         fontSize: 13,
-        fontWeight: '400',
     },
     ownerSection: {
-        marginTop: 8,
-        gap: 16,
+        padding: 20,
+        gap: 18,
     },
     ownerHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
+        marginBottom: 4,
     },
-    ownerDividerLine: {
-        flex: 1,
-        height: 1,
+    ownerIconContainer: {
+        width: 32,
+        height: 32,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     ownerLabel: {
-        fontSize: 12,
-        fontWeight: '600',
-        textTransform: 'uppercase',
-        letterSpacing: 0.8,
+        fontSize: 17,
+        fontWeight: '700',
+        letterSpacing: -0.3,
     },
     ownerActions: {
         gap: 12,
